@@ -1,4 +1,5 @@
 name: Increment Encrypted Number
+# Increments an encrypted counter every 5 minutes
 
 on:
   schedule:
