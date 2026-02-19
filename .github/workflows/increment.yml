@@ -1,0 +1,38 @@
+name: Increment Encrypted Number
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  increment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Decrypt, increment, re-encrypt
+        env:
+          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+        run: |
+          if [ -f number.txt.enc ]; then
+            CURRENT=$(openssl enc -aes-256-cbc -d -pbkdf2 -pass pass:"$ENCRYPTION_KEY" -in number.txt.enc)
+          else
+            CURRENT=0
+          fi
+
+          NEXT=$((CURRENT + 1))
+          echo "Incrementing $CURRENT -> $NEXT"
+
+          echo -n "$NEXT" | openssl enc -aes-256-cbc -pbkdf2 -pass pass:"$ENCRYPTION_KEY" -out number.txt.enc
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add number.txt.enc
+          git diff --cached --quiet || git commit -m "Increment number"
+          git push
