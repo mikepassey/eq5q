@@ -1,5 +1,5 @@
 name: Increment Encrypted Number
-# Increments an encrypted counter every 5 minutes
+# Increments an encrypted counter (manual trigger only)
 
 on:
   workflow_dispatch:
